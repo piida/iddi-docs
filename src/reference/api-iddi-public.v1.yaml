@@ -1,0 +1,451 @@
+openapi: 3.0.0
+info:
+  title: API Pública
+  version: '1.0'
+  description: |-
+    # Intro
+    API pública para consulta de perfil y catálogos de la Plataforma iDDi. Esta API puede ser usada por cualquier desarrollador que requiera verificar el estatus del perfil de un QR de Identidad Universitaria.
+
+    La API es RESTful, tiene URLs de recursos predecibles. Devuelve códigos de respuesta HTTP para indicar errores. También acepta y devuelve JSON en el cuerpo HTTP. Puedes usar tu biblioteca HTTP / REST de cualquier lenguaje de programación, o puedes usar uno de los SDK de iDDi (actualmente disponible en `PHP` y `Javascript`).
+
+    Esta referencia de API proporciona información sobre los endpoints disponibles y cómo interactuar con ellos. Para obtener más información sobre la API, consulta <https://iddi.uan.mx/docs/documentacion-tecnica/uso-de-la-api.html>.
+
+    # Autenticación
+    Cuando un desarrollador se registra para obtener acceso a la API de iDDi, se le otorga su primera clave de API secreta (`API-Key`). Se pueden generar claves API adicionales y eliminar claves API (ya que se puede necesitar rotar las claves en el futuro). Se autentica en la API proporcionando la clave en el encabezado de la solicitud.
+
+    Para consultar la API se pueden utilizar dos formas de autenticación: `API-Key` y `AccessToken` en forma de `JWT` (JSON Web Tokens).
+
+    * **API-Key**: utilizada para solicitudes realizadas desde el lado del servidor. Nunca comparta estas claves. Se deben mantener de manera secreta y segura.
+    * **JWT**: access tokens de corta duración a los que se les puede asignar una fecha de vencimiento específica.
+    
+    > Nunca se deben compartir las claves secretas. Se deben mantener vigiladas y seguras.
+
+    Se puede crear un AccessToken dentro de la página de Desarrolladores, que se encuentra aquí: <https://developers.iddi.uan.mx/account/api-keys>
+
+    > Los AccessToken caducan en máximo 3 meses. Esto es para limitar los riesgos asociados con los sistemas que se ejecutan sin ser monitoreados.
+
+    Para más información, consultar la documentación sobre el uso de la API: <https://iddi.uan.mx/docs/documentacion-tecnica/uso-de-la-api.html#seguridad>
+
+    # Paginación
+    Para todos los métodos que devuelven más de un solo objeto, proporcionamos paginación. Se puede usar enviando los siguientes parámetros de consulta.
+
+    Atributo|Tipo|Descripción
+    -----|----|-----
+    `limit`|Integer|El número total de objetos que se deben devolver. El valor predeterminado es `50`. Tiene un máximo de `500`.
+    `page`|Integer|Desplazamiento de página actual. Aumentar este número multiplicará por `limit`. Por defecto es `1`.
+
+    # Rate Limit
+    Para garantizar que la experiencia de uso de la API sea rápida para todos los clientes, implementamos el Rate Limit. Si se llega a los límites permitidos, se presentará un mensaje de error. Si el sistema cliente necesita aumentar los límites para un caso específico, se debe contactar a la Secretaría de Docencia.
+
+    # Errores
+    La API utiliza códigos de respuesta HTTP para indicar el éxito o el fallo de una solicitud. Los códigos dentro del rango `2xx` (**success**) se consideran peticiones completadas con éxito. Los códigos dentro de los rangos `4xx` (**fail**) y `5xx` (**error**) indicarán que se ha producido un error.
+
+    Utilizamos los siguientes códigos HTTP para gestionar los errores comunes.
+
+    Código de error|Significado
+    -----|----
+    400|**Solicitud incorrecta**: se ha pasado una solicitud con formato incorrecto.
+    401|**No autorizado**: compruebe cabecera `Autorization`. El Bearer token proporcionado no es válido.
+    403|**Prohibido**: su API-Key no puede acceder a este recurso
+    404|**No encontrado**: no se pudo encontrar el recurso especificado.
+    405|**Método no permitido**: intentó acceder a un endpoint con un método no válido.
+    406|**No aceptable**: solicitud con un formato json inválido.
+    422|**Entidad no procesable**: hay un problema de validación con la solicitud. Se proporcionan los campos y mensajes de error dentro de la respuesta.
+    429|**Demasiadas solicitudes**: la tasa de envío de mensajes es demasiado rápida. Recomendamos ralentizar sus solicitudes.
+    500, 502, 503, 504|Hay un problema con el servidor. Estos son raros y se enviará un mensaje sobre el error.
+
+    https://auth0.com/docs/api/management/v2
+  contact:
+    name: Aurex
+    email: aurex@uan.edu.mx
+servers:
+  - url: https://api.iddi.uan.mx/v1/iddi
+    description: Servidor productivo principal.
+  - url: https://api.iddi.uan.mx/v1-stag/iddi
+    description: Pruebas para consultas (stagging).
+  - url: 'http://127.0.0.1:3100'
+    description: MockServer - Prism
+paths:
+  '/perfil/{folio}':
+    get:
+      summary: Perfil por folio
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          headers:
+            X-Rate-Limit:
+              schema:
+                type: number
+                default: '100'
+        '400':
+          $ref: '#/components/responses/NoValido'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '422':
+          $ref: '#/components/responses/NoValidacion'
+        default:
+          $ref: '#/components/responses/Default'
+      operationId: get_perfil_by_folio
+      description: |-
+        Obtiene el [Perfil básico del usuario](https://iddi.uan.mx/docs/plataforma/perfiles.html#perfil-basico) y su estatus usando el [folio de la credencial](https://iddi.uan.mx/docs/documentacion-tecnica/qr-de-identidad.html#folio).
+
+        Es neccesario enviar como parámetro además del folio, la [firma digital](https://iddi.uan.mx/docs/documentacion-tecnica/qr-de-identidad.html#firma-digital) del QR para certificar que es un folio de una credencial emitida por iDDi.
+
+        Para solicitar el [Perfil extendido](https://iddi.uan.mx/docs/plataforma/perfiles.html#perfil-extendido) se requiere el scope `perfil:extendido` en el Access Token
+      parameters:
+        - schema:
+            type: boolean
+          in: query
+          name: perfil_extendido
+          description: |-
+            Solicita el perfil extendido de esta credencial.
+
+            Requiere scope `perfil:extendido`.
+        - schema:
+            type: string
+          in: query
+          name: firma_digital
+          required: true
+          description: EL componente de firma digital (último campo) del QR de una Credencial
+      security:
+        - accessToken:
+            - 'perfil'
+            - 'perfil:extendido'
+      tags:
+        - Perfil
+    parameters:
+      - schema:
+          type: string
+        name: folio
+        in: path
+        required: true
+        description: Folio de la credencial
+components:
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del usuario
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        nombre:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]+$"
+          example: VALENTINA JOSEFINA
+        ap_paterno:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]*$"
+          nullable: true
+          example: LADRON DE GUEVARA
+        ap_materno:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]*$"
+          nullable: true
+          example: ESPINOSA DE LOS MONTEROS
+        email:
+          type: string
+          maxLength: 100
+          example: iddi@uan.edu.mx
+        telefono:
+          type: string
+          maxLength: 15
+          example: (311) 211 8800
+        foto_url:
+          type: string
+          description: 'Si ya tiene foto, se retorna url asignada'
+          example: 'https://www.gravatar.com/avatar/278a5dbd3c0a9ec099df1755b4f7875f.jpg?size=400&d=identicon'
+          nullable: true
+        foto_aceptada:
+          type: boolean
+          example: true
+          description: Si ya tiene foto y fue aceptada
+        iddi_qr:
+          type: boolean
+          example: true
+          description: Si ya cuenta con al menos una identidad (credencial) verificada
+        iddi_movil:
+          type: boolean
+          example: false
+          description: Si ya inicializó su iDentidad Digital Móvil con la APP de UAN iDDi
+        perfiles:
+          type: array
+          description: |-
+            Si es tipo Personal (A,D): Listado de adscripciones activas.
+
+            Si es tipo Alumno (L,B,P): Listado de carreras donde se ha matriculado este alumno. Un alumno podría tener varias carreras con la misma matrícula.
+
+            Si es Externo o Staff: entidad que se está verificando y con la que debe iniciar sesión
+          items:
+            discriminator:
+              propertyName: tipo
+            oneOf:
+              - $ref: '#/components/schemas/PerfilAlumno'
+              - $ref: '#/components/schemas/PerfilTrabajador'
+      description: ''
+    PerfilAlumno:
+      type: object
+      properties:
+        tipo:
+          type: string
+          description: 'Tipo de usuario: B,L,P'
+          example: L
+          enum:
+            - B
+            - L
+            - P
+        id_perfil:
+          type: string
+          description: 'ID del perfil de este usuario (id_usuario_carrera | id_usuario_adscripcion)'
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        matricula:
+          type: string
+          example: '13047970'
+          description: Matrícula del alumno para esta carrera. Podría ser una matrícula diferente por carrera o también la misma matrícula para varias carreras
+        carrera_id:
+          type: integer
+          example: 6254
+          description: ID de SADCE de la carrera
+        u_academica:
+          type: string
+          example: UA DE TURISMO
+          description: Unidad Académica
+        programa:
+          type: string
+          example: NUTRICION
+          description: Programa matriculado
+        periodo:
+          type: string
+          example: AGO2013
+          description: Cohorte o Año de ingreso
+        estatus:
+          type: string
+          example: EGRESADO
+          description: Estatus académico o administrativo
+          enum:
+            - INSCRITO
+            - EGRESADO
+            - A PAGO
+            - BAJA TEMPORAL
+            - BAJA DEFINITIVA
+            - PREINSCRITO
+            - EN TRAMITE
+            - CON RECIBO
+            - ADMITIDO
+            - COMPLEMENTO
+            - CAMBIO DE CARRERA
+        id_iddi_qr:
+          type: boolean
+          example: true
+          description: Si ya se le ha generado una credencial con QR
+        vigencia_at:
+          type: string
+          format: date
+          description: Vigencia de la credencial con QR si ya se le generó una
+          nullable: false
+    PerfilTrabajador:
+      type: object
+      properties:
+        tipo:
+          type: string
+          description: 'Tipo de usuario: A,D'
+          example: A
+          enum:
+            - A
+            - D
+        id_perfil:
+          type: string
+          description: ID del perfil de este usuario (id_usuario_adscripcion)
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        num_empleado:
+          type: string
+          example: '87740'
+          description: Número de plaza o trabajador
+        estatus:
+          type: string
+          example: JUBILADO
+          description: Estatus del trabajador
+          enum:
+            - ACTIVO
+            - JUBILADO
+        id_iddi_qr:
+          type: boolean
+          example: true
+          description: Si ya se le ha generado una credencial con QR
+        vigencia_at:
+          type: string
+          format: date
+          description: Vigencia de la credencial con QR si ya se le generó una
+          nullable: false
+        adscripcion:
+          type: string
+          example: RECTORIA
+          description: Adscripción
+        plaza:
+          type: string
+          example: CONTRATO
+          description: 'Tipo de plaza según el catálogo de plazas. CONTRATO, BASE, JUBILADO, etc...'
+        fecha_ingreso:
+          type: string
+        nivel_salarial:
+          type: string
+    ApiFail:
+      type: object
+      description: |-
+        **FAIL**: Cuando los datos enviados podrían no ser correctos y el usuario puede solventarlo (ej: validación).
+        
+        Campos requeridos: `status` y `data`. `data.message` es opcional.
+
+        Se puede especificar un mensaje de error y su tipo `alert|error|info` en los campos `data.message` y `data.msg_type`.
+      properties:
+        status:
+          type: string
+          default: fail
+          enum:
+            - fail
+            - error
+        code:
+          type: string
+          description: 'Código personalizado: no_encontrado, no_validacion, 10422, etc'
+          nullable: true
+          example: no_encontrado
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              nullable: true
+              example: 'El recurso no fue localizado'
+            msg_type:
+              type: string
+              enum:
+                - alert
+                - error
+                - info
+              nullable: true
+              example: alert
+      required:
+        - status
+        - data
+    ApiError:
+      type: object
+      description: |-
+        **ERROR**: Cuando ocurrió un error en el servidor, generalmente estos no suceden (no se pudo escribir, no abrio archivo, no pudo procesar, etc).
+        
+        Campos requeridos: `status` y `data.message`.
+      properties:
+        status:
+          type: string
+          default: error
+          enum:
+            - fail
+            - error
+        code:
+          type: string
+          description: 'Código personalizado: no_db, no_validacion, 10422, etc'
+          nullable: true
+          example: no_db
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              nullable: true
+              example: 'No se pudo conectar a la Base de Datos, intentalo de nuevo en unos minutos'
+      required:
+        - status
+        - data
+    ApiFailValidation:
+      type: object
+      description: |-
+        Problema de validación de los datos enviados, se deben especificar los campos y sus mensajes descriptivos de los problemas.
+
+        Campos requeridos: `status` y `data.validation`. `data.message` es opcional.
+      properties:
+        status:
+          type: string
+          default: fail
+        code:
+          type: string
+          default: no_validacion
+          nullable: true
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              nullable: true
+              example: 'Hubo un problema al validar tus datos'
+            validation:
+              type: array
+              description: Arreglo con los campos que no pasaron la validación
+              items:
+                $ref: '#/components/schemas/ValidationFields'
+      required:
+        - status
+        - data
+    ValidationFields:
+      type: object
+      additionalProperties:
+        type: string
+      x-examples:
+        multiplesCampos:
+          nombre:
+            - Nombre requerido
+            - Nombre no debe ser vacio
+          folio:
+            - Folio no debe ser vacío
+        unCampo:
+          nombre:
+            - Nombre requerido
+  securitySchemes:
+    accessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: TOKEN
+    APIKey:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Para autenticarse en la API, se debe pasar un `JWT AccessToken` en la cabecera `Authorization` en forma de `Bearer <accessToken>`.'
+  responses:
+    NoValido:
+      description: ID proporcionado inválido
+    NoEncontrado:
+      description: Recurso no encontrado
+    NoAutorizado:
+      description: No autorizado
+    NoValidacion:
+      description: Excepción de validación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiFailValidation'
+    Default:
+      description: 'Hubo un problema al procesar tu solicitud, por favor inténtalo de nuevo o inténtalo más tarde.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            generico:
+              value:
+                status: fail
+                code: error_generico
+                data:
+                  message: 'Hubo un problema al procesar tu solicitud, por favor inténtalo de nuevo o inténtalo más tarde.'
+tags:
+  - name: Perfil
+    description: 'Perfil básico, estatus escolar/administrativo, estatus de la iDentidad Digital del Usuario. QR, vigencia y estatus de iDDi movil.'

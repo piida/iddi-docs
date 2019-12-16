@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="{{title}}">
+    <meta name="theme-color" content="#003b70">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <link rel="icon" href="/a/i/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="mask-icon" href="/a/i/icons/safari-pinned-tab.svg" color="#003b70">
+
+    <style>
+body{padding:0;margin:0;font-family:Poppins,HelveticaNeue-Light,Helvetica Neue,Calibri Light,Roboto,Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;color:#4f566b}h1,h2,h3,h4,h5,h6{font-family:Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif!important;color:#2c3e50;font-weight:600!important;line-height:1.25!important}h1{color:#003b70!important}h1{font-size:2.2rem}h2{font-size:1.65rem;padding-bottom:.3rem;border-bottom:1px solid #eaecef}h3{font-size:1.35rem}.menu-content{background:linear-gradient(45deg,#003d84,#001c3d) !important}.menu-content,.scrollbar-container{padding:1.5rem 0}.menu-content .search-input{border-bottom:1px solid #fff}.menu-content .scrollbar-container ul+div{display:none}.menu-content .scrollbar-container .-depth1{border-left:.25rem solid transparent}.menu-content .scrollbar-container .-depth1 span{font-weight:700;font-size:1rem}.menu-content .scrollbar-container .-depth1.active,.menu-content .scrollbar-container .-depth1:hover{border-left-color:#016ec8;color:#fff!important}.navbar{padding:.2rem 1.5rem;line-height:2.2rem;box-shadow:0 3px 6px 0 rgba(140,152,164,.25);background-color:#fff;background-image:linear-gradient(180deg,#fff 30%,#f7f7f8 60%,#f0f1f3);z-index:20;right:0;height:58px;box-sizing:border-box;border-bottom:1px solid #eaecef;position:fixed;top:0;left:0}.navbar a,.navbar img,.navbar span{display:inline-block;text-decoration:none}.navbar .site-name{font-weight:600;position:relative;font-family:Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif!important;font-size:1.5rem;color:#003d84;line-height:3.2rem}.navbar .logo{min-width:2.2rem;vertical-align:top;height:3.2rem;margin-right:.4rem}.navbar .links{background:0 0;padding-left:1.5rem;box-sizing:border-box;white-space:nowrap;position:absolute;right:1.5rem;top:.7rem;display:-webkit-box;display:flex;font-weight:600!important;font-family:Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif!important;text-transform:uppercase;font-size:1rem}.nav-links a{line-height:1.4rem;color:inherit}.nav-links a.router-link-active,.nav-links a:hover{color:#016ec8}.nav-links .nav-item{position:relative;display:inline-block;margin-left:1.5rem;line-height:2rem}.nav-links .nav-item:first-child{margin-left:0}.nav-link{font-weight:700;font-family:Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif!important;text-transform:uppercase;font-size:1rem;text-decoration:none}.api-content{padding-top:57px}@media (max-width:719px){.navbar{padding-left:4rem}.navbar .can-hide{display:none}.navbar .links{padding-left:1.5rem}.navbar .site-name{width:calc(100vw - 9.4rem);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}}
+    </style>
+    {{{redocHead}}}
+    {{#unless disableGoogleFont}}
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,600|Ubuntu:400&display=swap" rel="stylesheet">
+    {{/unless}}
+</head>
+
+<body>
+    <div class="theme-container">
+        <header class="navbar">
+            <a href="/docs/" class="home-link router-link-active"><img src="https://iddi.uan.mx/docs/a/i/logo-iddi.svg" alt="iDDi UAN" class="logo"> <span class="site-name can-hide">iDDi UAN</span></a>
+            <div class="links">
+                <nav class="nav-links can-hide">
+                    <div class="nav-item"><a href="/docs/" class="nav-link">Inicio</a></div>
+                </nav>
+            </div>
+        </header>
+    </div>
+    {{{redocHTML}}}
+</body>
+
+</html>

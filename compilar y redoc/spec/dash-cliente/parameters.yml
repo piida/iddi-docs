@@ -1,0 +1,13 @@
+pageParam:
+  name: page
+  in: query
+  required: false
+  schema:
+    type: integer
+
+limitParam:
+  name: limit
+  in: query
+  required: false
+  schema:
+    type: integer

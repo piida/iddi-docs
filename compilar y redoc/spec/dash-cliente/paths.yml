@@ -1,0 +1,62 @@
+
+  '/issuer/qr/{folio}':
+    get:
+      tags:
+        - qr
+      summary: Busca credencial por Folio
+      description: Regresa los datos de una credencial por folio
+      operationId: getQrByFolio
+      parameters:
+        - name: folio
+          in: path
+          description: Folio de la credencial
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9]{6}$'
+      responses:
+        '200':
+          description: Credencial encontrada
+          content:
+            application/json:
+              schema:
+                $ref: './api.yml#/components/schemas/Qr'
+        '400':
+          description: Folio inválido
+        '401':
+          description: No tiene permisos para acceder a este recurso
+        '404':
+          description: Credencial no encontrada
+      security:
+        - api_key: []
+    put:
+      tags:
+        - qr
+      summary: Actualiza la vigencia o revoca una credencial.
+      operationId: updateQr
+      parameters:
+        - name: folio
+          in: path
+          description: Folio de la credencial
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9]{6}$'
+      responses:
+        '400':
+          description: ID proporcionado es inválido
+        '401':
+          description: No tiene permisos para acceder a este recurso
+        '404':
+          description: Credencial no encontrada
+        '405':
+          description: Excepción de validación
+      security:
+        - api_key: []
+      requestBody:
+        $ref: './api.yml#/components/requestBodies/Actualizacion'
+    # delete:
+    #   tags:
+    #     - store
+    #   summary: Delete purchase order by ID
+    #   description: >-

@@ -1,0 +1,60 @@
+    get:
+      tags:
+        - perfil
+      summary: Perfil por Matrícula o Num Plaza
+      description: Perfil básico del usuario, estatus escolar/administrativo, estatus de la iDentidad Digital (iDDi). Lista de carreras si es alumno. QR, vigencia y estatus de iDDi movil.
+      operationId: getPerfilById
+      parameters:
+        - name: tipo
+          in: path
+          description: Tipo de usuario
+          required: true
+          schema:
+            type: string
+            enum:
+              - alumno
+              - docente
+              - administrativo
+              - movilidad
+              - visitante
+              - staff
+            example: alumno
+        - name: id
+          in: path
+          description: Matrícula o Num de Plaza del usuario
+          required: true
+          schema:
+            type: string
+          example: 15003500L
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '../api.yml#/components/schemas/Usuario'
+        # content:
+        #   application/json:
+        #     schema:
+        #       $ref: './api.yml#/components/schemas/Qr'
+        #   application/x-www-form-urlencoded:
+        #     schema:
+        #       type: object
+        #       properties:
+        #         name_of_pet:
+        #           description: Updated name of the pet
+        #           type: string
+        #   application/octet-stream:
+        #     schema:
+        #       type: string
+        #       format: binary
+        '400':
+          description: ID proporcionado es inválido
+        '401':
+          description: No tiene permisos para acceder a este recurso
+        '404':
+          description: Usuario no encontrado
+        '405':
+          description: Excepción de validación
+      security:
+        - api_key: []

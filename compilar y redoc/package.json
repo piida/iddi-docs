@@ -1,0 +1,25 @@
+{
+  "name": "ekontroll_api_spec",
+  "description": "eKontroll - Especificación de la API Dashboard cliente, Dashboard Despacho y Dashboard Admini",
+  "version": "1.2.5",
+  "author": "aurex <aurex@uan.edu.mx>, danielboy <danielcasi91@gmail.com>",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aurexs/ekontroll_api_spec"
+  },
+  "scripts": {
+    "build-spec-original": "cd scripts && node build-spec.js && swagger-cli validate ../spec/dist/api.yaml",
+    "build-spec-helper": "func() { node scripts/build-spec.js \"$1\" && swagger-cli validate dist/api-\"$1\".yaml; }; func",
+    "build-spec": "npm run build-spec-helper",
+    "serve-docs-helper": "func() { redoc-cli serve dist/api-\"$1\".yaml -p 8020 --watch; }; func",
+    "serve-docs": "npm run serve-docs-helper",
+    "list-spec": "ls ./spec"
+  },
+  "devDependencies": {
+    "js-yaml": "^3.13.1",
+    "json-refs": "^3.0.13",
+    "path-loader": "^1.0.10",
+    "swagger-cli": "^2.3.4"
+  }
+}

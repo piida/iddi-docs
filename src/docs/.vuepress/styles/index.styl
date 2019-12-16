@@ -1,0 +1,278 @@
+// @import url('https://fonts.googleapis.com/css?family=Poppins:400,600|Ubuntu:400&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,600|Ubuntu:400&display=swap');
+
+
+$darkAccentColor = #FFF;
+$darkColor = #bde6ff;
+
+
+body 
+//   font-family -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif
+    // font-family: Poppins,-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Helvetica Neue","Ubuntu"
+    font-family: Montserrat,HelveticaNeue-Light,Helvetica Neue,Calibri Light,Roboto,Helvetica,Arial,sans-serif;
+    font-size: 1rem;
+    // font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -.02em
+
+pre,code
+    letter-spacing: 0
+
+th, td
+    font-size: 90%;
+
+h1, h2, h3, h4, h5, h6
+    font-family: Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif !important;
+    letter-spacing: 0;
+    color:#2c3e50;
+h1, h2, h3
+    color: #003b70
+
+blockquote
+    color: #757575;
+
+.theme-container .home .feature p
+    color: #6c7693;
+.theme-container .home .hero .description
+    color: #8a91a8;
+
+.theme-container .navbar
+    padding: .2rem 1.5rem;
+    box-shadow: 0 3px 6px 0 rgba(140,152,164,.25);
+    background-image: linear-gradient(180deg, #fff 30%, #f7f7f8 60%, #f0f1f3);
+    & .site-name
+        font-family: Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif !important;
+        font-size: 1.5rem;
+        color: #003d84;
+        line-height: 3.2rem;
+    & .logo
+        height: 3.2rem;
+        margin-right: .4rem;
+    & .links
+        background: transparent;
+    & .nav-link,
+    & .dropdown-wrapper .dropdown-title
+        font-weight: bold;
+        font-family: Ubuntu,Helvetica Neue,Roboto,Helvetica,Arial,sans-serif !important;
+        text-transform: uppercase;
+        font-size: 1rem;
+.navbar .dropdown-wrapper .dropdown-subitem .nav-link
+    text-transform: none
+.navbar .dropdown-wrapper .nav-dropdown .dropdown-item a
+    padding-top: .2rem;
+    padding-bottom: .2rem;
+.navbar .dropdown-wrapper .nav-dropdown .dropdown-item h4
+    padding-bottom: .2rem;
+    background: #fafafa;
+
+.theme-default-content pre, .theme-default-content pre[class*="language-"]
+    // background: #2D3748
+    background-color: #f1f5f8;
+
+.theme-default-content pre.language-json,
+.theme-default-content pre.language-php,
+.theme-default-content pre.language-js
+    background: #2D3748 !important
+
+.theme-default-content pre code, .theme-default-content pre[class*="language-"] code
+    // color: #f5fbff;
+    color: #476582;
+    white-space: pre-wrap;
+    border: none
+
+.theme-default-content code
+    // color: #cd3d64
+    // background: #f7fafc;
+    color: #476582;
+    background: rgba(0,72.85714285714286,127.5,.054901960784314);
+    border: 1px solid rgba(0,0,0,.05);
+
+
+.theme-container .sidebar
+    background: #003b70;
+    background: linear-gradient(45deg, #003d84, #001c3d);
+    & .sidebar-links a.sidebar-link
+        color: $darkColor
+        &:hover
+            color: $darkAccentColor
+        &.active
+            color: $darkAccentColor
+            font-weight: bold;
+    & > .sidebar-links > li > a.sidebar-link
+        color: $darkAccentColor;
+        text-transform: uppercase;
+        font-size: 1em;
+
+.theme-container .sidebar .nav-links
+    & a
+        color: $darkColor
+        &:hover,
+        &.router-link-active
+            color $darkAccentColor
+    & .dropdown-title
+        color: $darkColor
+        &:hover
+            color $darkAccentColor
+    .dropdown-wrapper .nav-dropdown .dropdown-item h4,
+    .dropdown-wrapper .nav-dropdown .dropdown-item a
+        color: $darkColor
+        &:hover
+            color $darkAccentColor
+        &.router-link-active
+            color $darkAccentColor
+
+// .api-doc .theme-default-content
+//     max-width: 100vw
+//     padding: 0
+//     h1,
+//     h2,
+//     h3
+//         color: #003b70
+//         font-weight: 600;
+//         line-height: 1.25;
+//     h1
+//         font-size 2.2rem
+//     h2
+//         font-size 1.65rem
+//         padding-bottom .3rem
+//         border-bottom 1px solid $borderColor
+
+//     h3
+//         font-size 1.35rem
+
+
+
+// @require './config'
+
+// .content
+//   code
+//     color lighten($textColor, 20%)
+//     padding 0.25rem 0.5rem
+//     margin 0
+//     font-size 0.85em
+//     background-color rgba(27,31,35,0.05)
+//     border-radius 3px
+
+// .content
+//   pre, pre[class*="language-"]
+//     line-height 1.4
+//     padding 1.25rem 1.5rem
+//     margin 0.85rem 0
+//     background-color $codeBgColor
+//     border-radius 6px
+//     overflow auto
+//     code
+//       //color #fff
+//       padding 0
+//       background-color transparent
+//       border-radius 0
+
+// div[class*="language-"]
+//   position relative
+//   background-color $codeBgColor
+//   border-radius 6px
+//   .highlight-lines
+//     user-select none
+//     padding-top 1.3rem
+//     position absolute
+//     top 0
+//     left 0
+//     width 100%
+//     line-height 1.4
+//     .highlighted
+//       background-color darken($codeBgColor, 5%)
+//   pre, pre[class*="language-"]
+//     background transparent
+//     position relative
+//     z-index 1
+//   &::before
+//     position absolute
+//     z-index 3
+//     top 0.8em
+//     right 1em
+//     font-size 0.75rem
+//     color rgba(255, 255, 255, 0.4)
+//   &:not(.line-numbers-mode)
+//     .line-numbers-wrapper
+//       display none
+//   &.line-numbers-mode
+//     .highlight-lines .highlighted
+//         position relative
+//         &:before
+//           content ' '
+//           position absolute
+//           z-index 3
+//           left 0
+//           top 0
+//           display block
+//           width $lineNumbersWrapperWidth
+//           height 100%
+//           background-color rgba(0, 0, 0, 66%)
+//     pre
+//       padding-left $lineNumbersWrapperWidth + 1 rem
+//       vertical-align middle
+//     .line-numbers-wrapper
+//       position absolute
+//       top 0
+//       width $lineNumbersWrapperWidth
+//       text-align center
+//       color rgba(255, 255, 255, 0.3)
+//       padding 1.25rem 0
+//       line-height 1.4
+//       br
+//         user-select none
+//       .line-number
+//         position relative
+//         z-index 4
+//         user-select none
+//         font-size 0.85em
+//     &::after
+//       content ''
+//       position absolute
+//       z-index 2
+//       top 0
+//       left 0
+//       width $lineNumbersWrapperWidth
+//       height 100%
+//       border-radius 6px 0 0 6px
+//       border-right 1px solid rgba(0, 0, 0, 66%)
+//       background-color $codeBgColor
+
+
+// for lang in $codeLang
+//   div{'[class~="language-' + lang + '"]'}
+//     &:before
+//       content ('' + lang)
+
+// div[class~="language-javascript"]
+//   &:before
+//     content "js"
+
+// div[class~="language-typescript"]
+//   &:before
+//     content "ts"
+
+// div[class~="language-markup"]
+//   &:before
+//     content "html"
+
+// div[class~="language-markdown"]
+//   &:before
+//     content "md"
+
+// div[class~="language-json"]:before
+//   content "json"
+
+// div[class~="language-ruby"]:before
+//   content "rb"
+
+// div[class~="language-python"]:before
+//   content "py"
+
+// div[class~="language-bash"]:before
+//   content "sh"
+
+
+@media (max-width: $MQMobile)
+    .theme-container .navbar
+        padding-left 4rem

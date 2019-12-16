@@ -1,0 +1,29 @@
+{
+  "name": "iddi_docs",
+  "description": "iDDi UAN - Documentación",
+  "version": "1.2.5",
+  "author": "aurex <aurex@uan.edu.mx>",
+  "private": true,
+  "scripts": {
+    "docs:dev": "vuepress dev src/docs",
+    "docs:build": "rm -rf dist/docs && vuepress build src/docs",
+    "docs:dist": "yarn docs:build",
+    "docs:dist_preview": "yarn docs:build && node scripts/build-preview.js --preview",
+    "docs:dist_publish": "yarn docs:build && rsync -av -e \"ssh -p 2224\" ~/Sites/uan.iddi/api-docs/dist/docs app2:/var/www/iddi.uan.mx/api/public/",
+    "api:dist": "scripts/build-api-redoc.sh",
+    "api:dist_publish": "scripts/build-api-redoc.sh  && rsync -av -e \"ssh -p 2224\" ~/Sites/uan.iddi/api-docs/dist/api-spec app2:/var/www/iddi.uan.mx/api/public/"
+  },
+  "devDependencies": {
+    "@vuepress/plugin-medium-zoom": "^1.2.0",
+    "@vuepress/plugin-nprogress": "^1.2.0",
+    "@vuepress/plugin-pwa": "^1.2.0",
+    "chalk": "^3.0.0",
+    "connect": "^3.7.0",
+    "vuepress": "^1.2.0"
+  },
+  "dependencies": {
+    "redoc": "^2.0.0-rc.18",
+    "vuepress-plugin-migrate": "^1.0.3",
+    "widdershins": "^3.6.7"
+  }
+}

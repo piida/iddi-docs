@@ -1,0 +1,457 @@
+openapi: 3.0.0
+info:
+  description: |-
+    Esta es la especificación para la API de verificación de iDentidad Digital Universitaria (atestación).
+
+    Esta API es de uso interno por las instancias verificadoras (issuers) autorizadas de la UAN. Necesaria para generar la **iDentidad Digital Universitaria** ([https://iddi.uan.mx](https://iddi.uan.mx)) de Alumnos y Docentes de la UAN.
+  version: "1.0.0"
+  title: iDDi Verificación
+  termsOfService: 'https://iddi.uan.mx/legal/terms/'
+  contact:
+    email: asantos@uan.edu.mx
+servers:
+  - url: https://virtserver.swaggerhub.com/aurex/iddi-issuer/1.0.0
+    description: SwaggerHub API Auto Mocking
+  - url: https://api.iddi.uan.mx/v1/
+    description: "Servidor de la API en modo productivo, requiere certificado firmado por **iDDi UAN - Cert Authority** (https://ca.iddi.uan.mx) con el API-KEY del cliente como CN y la lista de IP's autorizadas como SAN. Requiere firma de petición del cliente y verificación de respuesta del servidor con *Public-key digital signatures* (usando el algoritmo Ed25519, metodología: [https://github.com/paragonie/sapient](https://github.com/paragonie/sapient))"
+  - url: https://api.iddi.uan.mx/v1-stag/
+    description: Servidor de la API en modo staging, no requiere certificado y esta abierto a cualquier IP. Las identidades verificadas se eliminan cada 15 días.
+  - url: https://api.iddi.uan.xxx/v1/
+    description: URL de la API para desarrollo. Requiere agregar el host a la máquina local.
+tags:
+  - name: perfil
+    description: Perfil básico, estatus escolar/administrativo, estatus de la iDentidad Digital de la Persona. Lista de carreras si es alumno, adscripciones si es Personal o LoginEntity si es Externo. QR, vigencia y estatus de iDDi movil.
+  - name: qr
+    description: Verificaciones (credenciales) registradas, sus metadatos y operaciones
+paths:
+  '/issuer/perfil/{tipo}/{id}':
+    $ref: "./issuer/perfil-by-matricula.yml"
+components:
+  parameters:
+    $ref: ./parameters.yml
+  responses:
+    NoValido:
+      description: ID proporcionado inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NoEncontrado:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NoAutorizado:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NoValidacion:
+      description: Excepción de validación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del usuario
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        tipo:
+          type: string
+          description: "Tipo de usuario: A Administrativo, D Docente, B Bachillerato, L Licenciatura, P Posgrado, E Externo, S Staff"
+          enum: [A,D,B,L,P,E,S]
+        nombre:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]+$"
+          example: VALENTINA JOSEFINA
+        ap_paterno:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]*$"
+          nullable: true
+          example: LADRON DE GUEVARA
+        ap_materno:
+          type: string
+          maxLength: 40
+          pattern: "^[-' ÑÜA-Z0-9]*$"
+          nullable: true
+          example: ESPINOSA DE LOS MONTEROS
+        email:
+          type: string
+          maxLength: 100
+          example: iddi@uan.edu.mx
+        telefono:
+          type: string
+          maxLength: 15
+          example: "(311) 211 8800"
+        foto_url:
+          type: string
+          description: Si ya tiene foto, se retorna url asignada
+          example: "https://www.gravatar.com/avatar/278a5dbd3c0a9ec099df1755b4f7875f.jpg?size=400&d=identicon"
+          nullable: true
+        foto_aceptada:
+          type: boolean
+          example: true
+          description: Si ya tiene foto y fue aceptada
+        iddi_qr:
+          type: boolean
+          example: true
+          description: Si ya cuenta con al menos una identidad (credencial) verificada
+        iddi_movil:
+          type: boolean
+          example: false
+          description: Si ya inicializó su iDentidad Digital Móvil con la APP de UAN iDDi
+        entidades:
+          type: array
+          description: "Si es tipo Personal(AD): Listado de adscripciones activas. Si es tipo Alumno(LBP): Listado de carreras donde se ha matriculado este alumno. Un alumno podría tener varias carreras con la misma matrícula. Si es Externo o Staff: entidad que se está verificando y con la que debe iniciar sesión"
+          items:
+            $ref: '#/components/schemas/Entidad'
+    Entidad:
+      type: object
+      properties:
+        id_entidad:
+          type: string
+          description: ID de la entidad que se debe verificar (id_usuario_carrera|id_usuario_adscripcion)
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        matricula:
+          type: string
+          example: 13047970
+          description: Matrícula del alumno para esta carrera (podría ser diferente por carrera o la misma para varias carreras)
+        carrera_id:
+          type: integer
+          example: 6254
+          description: ID de SADCE de la carrera
+        u_academica:
+          type: string
+          example: UA DE TURISMO
+          description: Unidad Académica
+        programa:
+          type: string
+          example: NUTRICION
+          description: Programa matriculado
+        periodo:
+          type: string
+          example: AGO2013
+          description: Cohorte o Año de ingreso
+        estatus:
+          type: string
+          example: EGRESADO
+          description: Se manda a BAJA TEMPORAL cuando no se efectúa el pago a tiempo (A PAGO), pero sigue siendo alumno. COMPLEMENTO y CAMBIO DE CARRERA son carreras que se quedan como registro histórico pero actualmente no están activas, no es alumno de esas carreras. PREINSCRITO, EN TRAMITE, CON RECIBO y ADMITIDO son estatus temporales de admisión, no es alumno hasta que tenga estatus de INSCRITO. En general, solo los estatus de INSCRITO, EGRESADO, A PAGO y BAJA TEMPORAL son aceptados como alumno de la institución y podría entrar como caso especial el BAJA DEFINITIVA para procesos internos.
+          enum: 
+            - INSCRITO
+            - EGRESADO
+            - A PAGO
+            - BAJA TEMPORAL
+            - BAJA DEFINITIVA
+            
+            - PREINSCRITO
+            - EN TRAMITE
+            - CON RECIBO
+            - ADMITIDO
+            
+            - COMPLEMENTO
+            - CAMBIO DE CARRERA
+        id_iddi_qr:
+          type: boolean
+          example: true
+          description: Si ya se le ha generado una credencial con QR
+        vigencia_at:
+          type: string
+          format: date
+          description: Vigencia de la credencial con QR si ya se le generó una
+          nullable: false
+    Qr:
+      type: object
+      properties:
+        folio:
+          type: string
+          description: ID de credencial
+          pattern: '^[a-zA-Z0-9]{6}$'
+        tipo:
+          type: string
+          description: "Tipo de credencial: A Administrativo, D Docente, B Bachillerato, L Licenciatura, P Posgrado, E Externo, S Staff"
+          enum: [A,D,B,L,P,E,S]
+        id_entidad:
+          type: string
+          description: ID de la entidad verificada (id_usuario_carrera|id_usuario_adscripcion)
+          pattern: '^[a-zA-Z0-9]{6}$'
+          example: 5dbd3c
+        id_usuario:
+          type: string
+          description: ID del usuario
+          pattern: '^[a-zA-Z0-9]{6}$'
+
+        matricula:
+          type: string
+          example: 13047970
+          description: Matrícula del alumno para esta carrera (podría ser diferente por carrera o la misma para varias carreras)
+        id_programa:
+          type: integer
+          description: Solo si tipo es B,L,P (alumno). Programa homogenizado
+        carrera_id:
+          type: integer
+          description: Solo si tipo es B,L,P (alumno). ID de Carrera de SADCE
+        u_academica:
+          type: string
+          example: UA DE TURISMO
+          description: Unidad Académica
+        programa:
+          type: string
+          example: NUTRICION
+          description: Programa matriculado
+        periodo:
+          type: string
+          example: AGO2013
+          description: Cohorte o Año de ingreso
+
+        estatus_entidad:
+          type: string
+          example: EGRESADO|JUBILADO
+        id_adscripcion:
+          type: integer
+          description: Solo si tipo es A,D,S (personal). ID de Adscripción a personal
+
+        estatus_qr:
+          type: integer
+          description: 1 Activo, 0 Revocado
+        revocado_razon:
+          type: string
+          description: Si estatus es revocado, aqui se especifica la razón
+          nullable: true
+        vigencia_at:
+          type: string
+          description: Fecha de término de la vigencia de la credencial (resello), se debe renovar cada semestre/año por el alumno (resellar) y actualizar este campo acorde al nuevo resello
+        created_at:
+          type: string
+          description: Fecha en que se verificó esta identidad o se generó la credencial
+        qr_string:
+          type: string
+          description: Cadena del QR
+    ApiSuccess:
+      type: object
+      description:  |-
+        Respuesta de la petición (similar a jsend). El status debe ser `success`.
+
+        *SUCCESS*: Operación correcta. Las propiedades `status` y `data` son requeridas.
+        En `data` se especifica una propiedad con un objeto o un array de varios objetos a retornar. Opcionalmente se puede especificar un mensaje que envía el servidor y su tipo `alert|error|info`.
+        Si la respuesta no lleva datos adicionales, se puede definir `data: null`
+        ```
+        GET: /usuarios/1
+        {
+          status: "success",
+          data {
+            usuario: {
+              id: 1, nombre: "Nombre"
+            }
+            carreras: [
+              {id: 1, programa: "ISC"},
+              {id: 2, programa: "INFO"}
+            ]
+            paginacion: {
+              offset: 0
+              per_page: 15
+              total: 79
+            }
+          }
+        }
+        ```
+
+        ```
+        GET: /updates
+        {
+          status: "success",
+          data {
+            "message": "La aplicación se ha actualizado, has clic para recargar",
+            "msg_type": "alert",
+            "msg_cb": "function(){window.location.reload()}",
+          }
+        }
+        ```
+
+        ```
+        DELETE: /usuarios/1
+        {
+            status : "success",
+            data : null
+        }
+        ```
+      properties:
+        status:
+          type: string
+          description: Estatus de la petición.
+          default: success
+          example: success
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              nullable: true
+              example: "Objeto no localizado, refresca la página"
+            msg_type:
+              type: string
+              enum: [alert, error, info]
+              default: alert
+              nullable: true
+              example: error
+            msg_cb:
+              type: string
+              description: Callback cuando se cierre el cuadro de diálogo
+              nullable: true
+              example: "window.location.reload()"
+    ApiError:
+      type: object
+      description:  |-
+        Error en la respuesta. El status debe ser `fail|error`.
+
+        Opcionalmente se puede especificar un mensaje que envía el servidor y su tipo `alert|error|info`.
+
+        *FAIL*: Cuando los datos enviados podrían no ser correctos y el usuario puede solventarlo (ej: validación). Requeridos: `status & data`
+        ```
+        {
+            "status" : "fail",
+            "code" : "no_validacion",
+            "data" : {
+                "validation": [{"campo": ["campo requerido", "campo no vacio"]}] },
+                "message": "Error de validación"
+        }
+        ```
+
+        *ERROR*: Cuando ocurrió un error en el servidor, usualmente estos no suceden (no pudo escribir, no abrio archivo, no pudo procesar, etc)
+        requeridos: `status & data.message`
+        ```
+        {
+          "status" : "error",
+          "code" : "no_db",
+          "data": {
+            "message": "Hubo un error",
+            "validation" : [{"campo": ["campo requerido", "campo no vacio"]}]
+          }
+        }
+        ```
+      properties:
+        status:
+          type: string
+          description: Estatus de la petición.
+          enum: [fail, error]
+          example: error
+        code:
+          type: string
+          description: "Solo cuando status es fail o error se debe indicar un code, ej: no_db, no_validacion.."
+          nullable: true
+          example: no_encontrado
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              nullable: true
+              example: "Objeto no localizado, refresca la página"
+            msg_type:
+              type: string
+              enum: [alert, error, info]
+              default: alert
+              nullable: true
+              example: error
+            msg_cb:
+              type: string
+              description: Callback cuando se cierre el cuadro de diálogo
+              nullable: true
+              example: "function(){window.location.reload()}"
+            validation:
+              type: array
+              nullable: true
+              description: 'Cuando hay error de validación (http 422) se envía este campo en formato: [{campo:["mensaje de error1", "mensaje de error2"]}, {campo2: ["mensaje de error"]}...]. Ej: [{"nombre": ["Nombre requerido", "Nombre solo permite caracteres alfanumericos"]}]'
+              items:
+                $ref: '#/components/schemas/ValidationMsg'
+    ValidationMsg:
+      type: object
+      additionalProperties:
+        type: string
+      example: "{campo: requeritdo}"
+  requestBodies:
+    Actualizacion:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              revocar_por:
+                description: Revoca la credencial por alguno de los motivos aquí especificados.
+                type: string
+                enum: [Robo, Extravío, Daño, Desgaste, Uso Indebido, Default, Otro]
+                nullable: true
+              vigencia_at:
+                description: Actualiza la vigencia de la credencial a la fecha aquí especificada.
+                type: string
+                format: date
+                nullable: true
+                pattern: "YYYY-MM-DD"
+                example: "2020-07-01"
+      description: Objeto de tipo de actualización (refrescar o revocar). Actualización de credencial, parámetros revocar_por y vigencia_at son mutuamente excluyentes, si se envían ambos, el servidor devolverá un error.
+      required: true
+    Atestacion:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id_entidad:
+                type: string
+                description: "ID de la entidad que se está validando (id_usuario_carrera|id_usuario_adscripcion)"
+                pattern: '^[a-zA-Z0-9]{6}$'
+                example: 1zr1R
+              tipo:
+                type: string
+                description: "Tipo de usuario: A Administrativo, D Docente, B Bachillerato, L Licenciatura, P Posgrado, E Externo, S Staff"
+                enum: [A,D,B,L,P,E,S]
+                example: L
+              nip:
+                type: string
+                description: "Hash (sha256) en representación hexadecimal del nuevo nip de 4 dígitos del usuario. Si se envía, se actualiza el nip del usuario. Los hash nips obvios no están permitidos: 1234, 4321, 4444, 3333, 2222, 1111"
+                pattern: '^[a-f0-9]{64}$'
+                example: e81d47bc1914daacdfe3670959ae7f749fd47976471fc68ed00041f6150c80b6
+                nullable: true
+              vigencia_at:
+                description: Vigencia de la nueva credencial.
+                type: string
+                format: date
+                pattern: "YYYY-MM-DD"
+                example: "2020-07-01"
+              renovacion_por:
+                description: Revoca la credencial anterior si existe alguna.
+                type: string
+                enum: [Robo, Extravío, Daño, Desgaste, Uso Indebido, Default, Otro]
+                nullable: true
+              foto:
+                type: string
+                format: byte
+                description: "Foto del rostro del usuario en Base64, si ya se tiene registro no es necesario volver a enviarla"
+                pattern: '^[-_+/=a-zA-Z0-9]+$'
+                nullable: true
+              huella:
+                type: string
+                format: byte
+                description: "Vector de la huella digital del usuario en Base64"
+                pattern: '^[-_+/=a-zA-Z0-9]+$'
+                nullable: true
+      description: Datos de la credencial que será agregada.
+      required: true
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+    appId:
+      type: apiKey
+      in: header
+      name: X-APP-ID
